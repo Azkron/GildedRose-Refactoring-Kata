@@ -24,6 +24,7 @@ interface ItemUpdater
     updateItem();
 }
 
+// Atm only updates the sellIn property as legendary items quality do not change
 class LegendaryUpdater implements ItemUpdater
 {
     constructor(private item: Item){}
@@ -33,6 +34,7 @@ class LegendaryUpdater implements ItemUpdater
     };
 }
 
+// Updater for normal items that has into account if they are conjured
 class NormalUpdater implements ItemUpdater
 {
     private qualityMod: number = 1;
@@ -60,6 +62,7 @@ class NormalUpdater implements ItemUpdater
     }
 }
 
+// Updater for Aging items that increase of value as they get older
 class AgingUpdater implements ItemUpdater
 {
     constructor(private item: Item){}
@@ -72,6 +75,7 @@ class AgingUpdater implements ItemUpdater
     }
 }
 
+// Updater for Events 
 class EventUpdater implements ItemUpdater
 {
     private qualityMod: number = 1;
@@ -113,6 +117,7 @@ class EventUpdater implements ItemUpdater
     }
 }
 
+// If you add any new kind of legendary, aging or event items you MUST add them in the corresponding array
 const legendaryItems: Array<String> = ['Sulfuras, Hand of Ragnaros'];
 const agingItems: Array<String> = ['Aged Brie'];
 const eventItems: Array<String> = ['Backstage passes to a TAFKAL80ETC concert'];
@@ -126,6 +131,7 @@ export class GildedRose
     {
         this.items = items;
 
+        // We create an updater for each item
         this.items.forEach(item => 
         {
             if(legendaryItems.indexOf(item.name) > -1)
@@ -141,6 +147,7 @@ export class GildedRose
 
     updateQuality() 
     {
+        // Just tell all Updaters to update their items
         this.ItemUpdaters.forEach(updater => 
         {
             updater.updateItem();
