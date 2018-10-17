@@ -12,18 +12,19 @@ export class Item
     }
 }
 
-
+// Returns true if item is conjured
 function isConjured(item: Item)
 {
     return item.name.substring(0,8) == "Conjured";
 }
 
-interface ItemTracker
+// Interface meant to update items
+interface ItemUpdater
 {
     updateItem();
 }
 
-class LegendaryTracker implements ItemTracker
+class LegendaryUpdater implements ItemUpdater
 {
     constructor(private item: Item){}
     updateItem()
@@ -32,7 +33,7 @@ class LegendaryTracker implements ItemTracker
     };
 }
 
-class NormalTracker implements ItemTracker
+class NormalUpdater implements ItemUpdater
 {
     private qualityMod: number = 1;
     constructor(private item: Item)
@@ -59,7 +60,7 @@ class NormalTracker implements ItemTracker
     }
 }
 
-class AgingTracker implements ItemTracker
+class AgingUpdater implements ItemUpdater
 {
     constructor(private item: Item){}
     updateItem(){
@@ -71,7 +72,7 @@ class AgingTracker implements ItemTracker
     }
 }
 
-class EventTracker implements ItemTracker
+class EventUpdater implements ItemUpdater
 {
     private qualityMod: number = 1;
     constructor(private item: Item)
@@ -119,7 +120,7 @@ const eventItems: Array<String> = ['Backstage passes to a TAFKAL80ETC concert'];
 export class GildedRose 
 {
     items: Array<Item>;
-    itemTrackers : Array<ItemTracker>
+    ItemUpdaters : Array<ItemUpdater>
 
     constructor(items = []) 
     {
@@ -128,21 +129,21 @@ export class GildedRose
         this.items.forEach(item => 
         {
             if(legendaryItems.indexOf(item.name) > -1)
-                this.itemTrackers.push(new LegendaryTracker(item));
+                this.ItemUpdaters.push(new LegendaryUpdater(item));
             else if(agingItems.indexOf(item.name) > -1)
-                this.itemTrackers.push(new AgingTracker(item));
+                this.ItemUpdaters.push(new AgingUpdater(item));
             else if(eventItems.indexOf(item.name) > -1)
-                this.itemTrackers.push(new EventTracker(item));
+                this.ItemUpdaters.push(new EventUpdater(item));
             else
-                this.itemTrackers.push(new NormalTracker(item));
+                this.ItemUpdaters.push(new NormalUpdater(item));
         });
     }
 
     updateQuality() 
     {
-        this.itemTrackers.forEach(tracker => 
+        this.ItemUpdaters.forEach(updater => 
         {
-            tracker.updateItem();
+            updater.updateItem();
         });
 
         return this.items;
