@@ -1,9 +1,11 @@
-export class Item {
+export class Item 
+{
     name: string;
     sellIn: number;
     quality: number;
 
-    constructor(name, sellIn, quality) {
+    constructor(name, sellIn, quality) 
+    {
         this.name = name;
         this.sellIn = sellIn;
         this.quality = quality;
@@ -11,46 +13,56 @@ export class Item {
 }
 
 
-function isConjured(item: Item){
+function isConjured(item: Item)
+{
     return item.name.substring(0,8) == "Conjured";
 }
 
-interface ItemTracker{
-    updateQuality();
+interface ItemTracker
+{
+    updateItem();
 }
 
-class LegendaryTracker implements ItemTracker{
-    updateQuality(){};
+class LegendaryTracker implements ItemTracker
+{
+    constructor(private item: Item){}
+    updateItem()
+    {
+        this.item.sellIn -= 1;
+    };
 }
 
-class NormalTracker implements ItemTracker{
+class NormalTracker implements ItemTracker
+{
     private qualityMod: number = 1;
     constructor(private item: Item)
     {
         if(isConjured(item))
             this.qualityMod = 2;
         
-        if(this.item.sellIn == 0)
+        if(this.item.sellIn <= 0)
             this.qualityMod *= 2;
         
     }
 
-    updateQuality(){
+    updateItem()
+    {
         this.item.sellIn -= 1;
         if(this.item.sellIn == 0)
             this.qualityMod *= 2;
 
-        if(this.item.quality > 0){
-            this.item.quality = this.item.quality >= this.qualityMod ? 
+        if(this.item.quality > 0)
+        {
+            this.item.quality = this.item.quality > this.qualityMod ? 
                 this.item.quality - this.qualityMod : 0;
         }
     }
 }
 
-class AgingTracker implements ItemTracker{
+class AgingTracker implements ItemTracker
+{
     constructor(private item: Item){}
-
-    updateQuality(){
+    updateItem(){
         this.item.sellIn -= 1;
 
         if(this.item.quality < 50){
@@ -59,7 +71,8 @@ class AgingTracker implements ItemTracker{
     }
 }
 
-class EventTracker implements ItemTracker{
+class EventTracker implements ItemTracker
+{
     private qualityMod: number = 1;
     constructor(private item: Item)
     {
@@ -72,12 +85,14 @@ class EventTracker implements ItemTracker{
         
     }
 
-    updateQuality(){
-        if(this.item.sellIn <= 0){
+    updateItem()
+    {
+        if(this.item.sellIn <= 0)
+        {
             this.item.sellIn -= 1;
-            return;
         }
-        else{
+        else
+        {
             this.item.sellIn -= 1;
 
             if(this.item.sellIn == 10)
@@ -90,70 +105,45 @@ class EventTracker implements ItemTracker{
             }
 
             if(this.item.quality > 0){
-                this.item.quality = 50 - this.item.quality >= this.qualityMod ? 
+                this.item.quality = (50 - this.item.quality) > this.qualityMod ? 
                     this.item.quality += this.qualityMod : 50;
             }
         }
     }
 }
 
-export class GildedRose {
-    items: Array<Item>;
+const legendaryItems: Array<String> = ['Sulfuras, Hand of Ragnaros'];
+const agingItems: Array<String> = ['Aged Brie'];
+const eventItems: Array<String> = ['Backstage passes to a TAFKAL80ETC concert'];
 
-    constructor(items = []) {
+export class GildedRose 
+{
+    items: Array<Item>;
+    itemTrackers : Array<ItemTracker>
+
+    constructor(items = []) 
+    {
         this.items = items;
+
+        this.items.forEach(item => 
+        {
+            if(legendaryItems.indexOf(item.name) > -1)
+                this.itemTrackers.push(new LegendaryTracker(item));
+            else if(agingItems.indexOf(item.name) > -1)
+                this.itemTrackers.push(new AgingTracker(item));
+            else if(eventItems.indexOf(item.name) > -1)
+                this.itemTrackers.push(new EventTracker(item));
+            else
+                this.itemTrackers.push(new NormalTracker(item));
+        });
     }
 
-    updateQuality() {
-        for (let i = 0; i < this.items.length; i++) {
-
-            // OLD CODE
-            if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                if (this.items[i].quality > 0) {
-                    if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                        this.items[i].quality = this.items[i].quality - 1
-                    }
-                }
-            } else {
-                if (this.items[i].quality < 50) {
-                    this.items[i].quality = this.items[i].quality + 1
-                    if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].sellIn < 11) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                        if (this.items[i].sellIn < 6) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].sellIn = this.items[i].sellIn - 1;
-            }
-
-            if (this.items[i].sellIn < 0) {
-                if (this.items[i].name != 'Aged Brie') {
-                    if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].quality > 0) {
-                            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                                this.items[i].quality = this.items[i].quality - 1
-                            }
-                        }
-                    } else {
-                        this.items[i].quality = this.items[i].quality - this.items[i].quality
-                    }
-                } else {
-                    if (this.items[i].quality < 50) {
-                        this.items[i].quality = this.items[i].quality + 1
-                    }
-                }
-            }
-        }
+    updateQuality() 
+    {
+        this.itemTrackers.forEach(tracker => 
+        {
+            tracker.updateItem();
+        });
 
         return this.items;
     }
